@@ -21,6 +21,7 @@ def get_kegg_ko_id(kegg_gene_ids):
 				temp_l = line.split(" ")
 				temp_l = list(filter(None, temp_l))
 				orthology_ids.append((gene_id, temp_l[1]))
+				break
 
 	return orthology_ids
 
@@ -33,13 +34,13 @@ if __name__ == "__main__":
 		"-i",
 		"--input",
 		dest="inputf",
-		help="Choosing the Input PDB File to be Processed and Reformatted."
+		help="Choosing the Input File to be Processed and Reformatted."
 	)
 	parser.add_argument(
 		"-o",
 		"--output",
 		dest="outputf",
-		help="Choosing the Name of the Ouput PDB File to be Output After Processing is Complete."
+		help="Choosing the Name of the Ouput File to be Output After Processing is Complete."
 	)
 	option = parser.parse_args()
 	
@@ -48,19 +49,17 @@ if __name__ == "__main__":
 	
 	# Converting all list elements to human kegg gene id's
 	kegg_ids = list(map(lambda x:f"hsa:{x}",df))
-	print(kegg_ids)
+	ids_comb = list(zip(df, kegg_ids))
 	kegg_ko_ids = get_kegg_ko_id(kegg_ids)
+	# print(kegg_ids)	
 
 	f = open("kegg_overlap_input.txt","w+")
 	for i in kegg_ko_ids:
 		f.write(f"{i[0]}  {i[1]}\n")
 	f.close()
 
-	# df.to_excel(f"{option.outputf}.xlsx")
-
-	# r = requests.get(f"http://rest.kegg.jp/get/hsa:116496")
-	# content = r.text
-	# pp(r.text)
-
-
-	# print(get_kegg_ko_id(kegg_ids))
+	entrez_kegg_df = pd.DataFrame(
+		data=ids_comb,
+		columns=["Entrez ID","KEGG ID"]
+	)
+	entrez_kegg_df.to_excel(f"{option.outputf}.xlsx")
